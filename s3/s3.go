@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"sync"
 
@@ -328,6 +329,7 @@ func (s *S3File) Create(key string) (source.ParquetFile, error) {
 // openWrite creates an S3 uploader that consumes the Reader end of an io.Pipe.
 // Calling Close signals write completion.
 func (s *S3File) openWrite() {
+	log.Println("openWrite() calledd.....")
 	pr, pw := io.Pipe()
 	uploader := s3manager.NewUploaderWithClient(s.client, s.uploaderOptions...)
 	s.lock.Lock()
@@ -347,10 +349,11 @@ func (s *S3File) openWrite() {
 
 	go func(uploader *s3manager.Uploader, params *s3manager.UploadInput, done chan error) {
 		defer close(done)
-
+		log.Printf("Inside goroutine..value of params::%+v", params)
 		// upload data and signal done when complete
 		_, err := uploader.UploadWithContext(s.ctx, params)
 		if err != nil {
+			fmt.Println("Error while uploading to S3:", err)
 			s.lock.Lock()
 			s.err = err
 			s.lock.Unlock()
