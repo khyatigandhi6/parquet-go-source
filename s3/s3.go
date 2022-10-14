@@ -338,10 +338,11 @@ func (s *S3File) openWrite() {
 	s.lock.Unlock()
 
 	uploadParams := &s3manager.UploadInput{
-		Bucket: aws.String(s.BucketName),
-		Key:    aws.String(s.Key),
-		ACL:    aws.String(s.ACL),
-		Body:   s.pipeReader,
+		Bucket:               aws.String(s.BucketName),
+		Key:                  aws.String(s.Key),
+		ACL:                  aws.String(s.ACL),
+		ServerSideEncryption: aws.String("AES256"),
+		Body:                 s.pipeReader,
 	}
 
 	go func(uploader *s3manager.Uploader, params *s3manager.UploadInput, done chan error) {
